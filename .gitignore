@@ -1,6 +1,5 @@
 target/
-.settings
 .classpath
 .project
-output/
-/pom.xml
+.settings/
+*.class

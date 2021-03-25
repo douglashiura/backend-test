@@ -1,12 +1,14 @@
 package com.axreng.backend;
 
-import com.axreng.backend.webcrawling.WebNavigator;
+import java.io.IOException;
+
+import com.axreng.backend.webcrawling.CrawlingProcessor;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         
-    	WebNavigator webNavigator = new WebNavigator("http://hiring.axreng.com/", "four");
-    	webNavigator.navigate();
+    	CrawlingProcessor webNavigator = new CrawlingProcessor("http://hiring.axreng.com/", "four", -1);
+    	webNavigator.executeCrawling();
     }
 }
