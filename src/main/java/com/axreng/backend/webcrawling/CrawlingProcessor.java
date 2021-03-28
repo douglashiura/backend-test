@@ -11,17 +11,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import com.axreng.backend.exceptions.InputException;
 
 public class CrawlingProcessor {
 
+	private final String HREF_REGEX = "href=\"(.*?)\"";
+	
 	private URL baseUrl;
 	private String keyword;
 	private Integer maxResults;
 	private Set<String> visitedUrls;
-	private Set<String> findedUrls;
+	private Set<String> foundUrls;
 
 	private Set<String> resultSet;
 	
@@ -35,7 +36,7 @@ public class CrawlingProcessor {
 		this.maxResults = this.ioUtils.verifyMaxResults(maxResults);
 		
 		this.visitedUrls = new HashSet<>();
-		this.findedUrls = new HashSet<>();
+		this.foundUrls = new HashSet<>();
 		this.resultSet = new HashSet<>();
 	}
 
@@ -45,25 +46,23 @@ public class CrawlingProcessor {
 		this.ioUtils.printResults(this.baseUrl.toString(), this.keyword, this.resultSet);
 	}
 
-	private void processUrl(URL url) throws IOException{
+	private void processUrl(URL currentUrl) throws IOException{
 		if(this.maxResults != -1 && resultSet.size() >= this.maxResults) {
 			return;
 		}
 		
-		List<String> lines = this.ioUtils.getHtmlLines(url);
+		List<String> lines = this.ioUtils.getHtmlLines(currentUrl);
 		
 		if(findKeyword(lines, keyword)) {
-			this.resultSet.add(url.toString());
+			this.resultSet.add(currentUrl.toString());
 		}
 		
-		Map<String, URL> internalUrls = findInternalUrls(lines, url.toString());
+		Map<String, URL> internalUrls = findInternalUrls(lines, currentUrl.toString());
 		
 		for(URL internalUrl: internalUrls.values()) {
 			processUrl(internalUrl);
 		}
-		
-		System.out.println("Visitado: -> "+ url.toString());
-		visitedUrls.add(url.toString());
+		visitedUrls.add(currentUrl.toString());
 	}
 	
 	private Boolean findKeyword(List<String> lines, String keyword) {	
@@ -71,12 +70,11 @@ public class CrawlingProcessor {
 		return lines.stream().anyMatch(line -> p.matcher(line).find());
 	}
 	
-	private Map<String, URL> findInternalUrls(List<String> lines, String baseUrl) throws MalformedURLException{
+	private Map<String, URL> findInternalUrls(List<String> lines, String actualUrl) throws MalformedURLException{
 		Map<String, URL> internalUrls = new HashMap<>();
-		List<String> linesContainingBaseUrl = lines.stream().filter(line -> line.contains("href")).collect(Collectors.toList());
 			
-		Pattern p = Pattern.compile("href=\"(.*?)\"", Pattern.DOTALL);
-		for(String line: linesContainingBaseUrl) {
+		Pattern p = Pattern.compile(HREF_REGEX, Pattern.DOTALL);
+		for(String line: lines) {
 			Matcher m = p.matcher(line);
 			
 			while(m.find()) {
@@ -86,31 +84,31 @@ public class CrawlingProcessor {
 				}
 				URI uri = URI.create(urlStr);
 				
-				URL url = verifyUri(uri, baseUrl);
+				URL url = contructUrl(uri, actualUrl);
 				
 				if(url == null) {
 					continue;
 				}
 				
 				urlStr = url.toString();
-				if(!this.findedUrls.contains(urlStr) && !this.visitedUrls.contains(urlStr) && !internalUrls.containsKey(urlStr)) {
+				if(!this.foundUrls.contains(urlStr) && !this.visitedUrls.contains(urlStr) && !internalUrls.containsKey(urlStr)) {
 					internalUrls.put(urlStr, url);
-					this.findedUrls.add(urlStr);
+					this.foundUrls.add(urlStr);
 				}
 			}
 		}
 		return internalUrls;
 	}
 	
-	private URL verifyUri(URI uri, String baseUrl) throws MalformedURLException {
+	private URL contructUrl(URI uri, String currentUrl) throws MalformedURLException {
 		String uriStr = uri.toString();
 		
 		if(uri.isAbsolute()) {
-			if(uriStr.contains(baseUrl)) {
+			if(uriStr.contains(currentUrl)) {
 				return new URL(uri.toString());
 			}
 		}else if(uriStr.startsWith("../")){
-			return new URL(baseUrl+uri.toString().replace("../", ""));
+			return new URL(this.baseUrl+uri.toString().replace("../", ""));
 		}else {
 			return new URL(this.baseUrl+uri.toString());
 		}
