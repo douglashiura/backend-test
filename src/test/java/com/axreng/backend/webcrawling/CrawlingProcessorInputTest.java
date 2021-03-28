@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.axreng.backend.exceptions.InputException;
 
-public class CrawlingProcessorTest {
+public class CrawlingProcessorInputTest {
 
 	/*
 	 * Should fail: URL not present.
