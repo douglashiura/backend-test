@@ -1,36 +1,77 @@
 package com.axreng.backend.webcrawling;
 
-import static org.mockito.Mockito.mock;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class CrawlingProcessorFunctionalTest {
 
+	@Mock
 	private IOUtils ioUtils;
 
 	@InjectMocks
 	private CrawlingProcessor crawlingProcessor;
 
-	@BeforeEach
-	public void setUp() throws IOException {
-		this.ioUtils = mock(IOUtils.class);
+	public void setUp(String url, String keyword, Integer maxResults) throws IOException {
+		this.crawlingProcessor = new CrawlingProcessor(url, keyword, maxResults);
+		MockitoAnnotations.openMocks(this);
 	}
 
 	@Test
-	public void urlNotPresentTest() throws IOException {
-		String url = "http://hiring.axreng.com/";
-		Mockito.doReturn(getLines(1)).when(this.ioUtils).getHtmlLines(Mockito.any());
-		this.crawlingProcessor = new CrawlingProcessor(url, "before", -1);
-		crawlingProcessor.executeCrawling();
+	public void shouldVisitTwoPagesFindTwoResults01() throws IOException {
+		setUp("http://hiring.axreng.com/", "before", -1);
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(2));		
+
+		this.crawlingProcessor.executeCrawling();
+		
+		assertEquals(2, this.crawlingProcessor.getResultSet().size());
+	}
+	
+	/*
+	 * Test case insensitive.
+	 */
+	@Test
+	public void shouldVisitTwoPagesFindTwoResults02() throws IOException {
+		setUp("http://hiring.axreng.com/", "BeFoRe", -1);
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(2));		
+
+		this.crawlingProcessor.executeCrawling();
+		
+		assertEquals(2, this.crawlingProcessor.getResultSet().size());
+	}
+	
+	@Test
+	public void shouldVisitTwoPagesFindOneResult() throws IOException {
+		setUp("http://hiring.axreng.com/", "before", 1);
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(2));		
+
+		this.crawlingProcessor.executeCrawling();
+		
+		assertEquals(1, this.crawlingProcessor.getResultSet().size());
+	}
+	
+	@Test
+	public void shouldNotVisitSecondPage() throws IOException {
+		setUp("http://hiring.axreng.com/", "before", 1);
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
+		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(3));		
+
+		this.crawlingProcessor.executeCrawling();
+		
+		assertEquals(1, this.crawlingProcessor.getResultSet().size());
 	}
 
 	private List<String> getLines(Integer lineSelect) {
@@ -46,6 +87,8 @@ public class CrawlingProcessorFunctionalTest {
 					"href=\"index8.html\"");//
 		case 2:
 			return Arrays.asList("http://hiring.axreng.com/index.html before");
+		case 3:
+			return Arrays.asList("http://hiring.axreng");
 		default:
 			return new ArrayList<>();
 

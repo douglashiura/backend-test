@@ -3,7 +3,6 @@ package com.axreng.backend.webcrawling;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,7 +17,7 @@ import com.axreng.backend.exceptions.InputException;
 
 public class CrawlingProcessor {
 
-	private URL baseURL;
+	private URL baseUrl;
 	private String keyword;
 	private Integer maxResults;
 	private Set<String> visitedUrls;
@@ -29,11 +28,11 @@ public class CrawlingProcessor {
 	private IOUtils ioUtils;
 
 	public CrawlingProcessor(String baseUrl, String keyword, Integer maxResults) throws InputException {
-		this.baseURL = verifyBaseURL(baseUrl);
-		this.keyword = verifyKeyword(keyword);
-		this.maxResults = verifyMaxResults(maxResults);
-		
 		this.ioUtils = new IOUtils();
+		
+		this.baseUrl = this.ioUtils.verifyBaseURL(baseUrl);
+		this.keyword = this.ioUtils.verifyKeyword(keyword);
+		this.maxResults = this.ioUtils.verifyMaxResults(maxResults);
 		
 		this.visitedUrls = new HashSet<>();
 		this.findedUrls = new HashSet<>();
@@ -41,12 +40,12 @@ public class CrawlingProcessor {
 	}
 
 	public void executeCrawling() throws IOException {
-		processUrl(this.baseURL);
+		processUrl(this.baseUrl);
 		
-		this.ioUtils.printResults(this.baseURL.toString(), this.keyword, this.resultSet);
+		this.ioUtils.printResults(this.baseUrl.toString(), this.keyword, this.resultSet);
 	}
 
-	public void processUrl(URL url) throws IOException{
+	private void processUrl(URL url) throws IOException{
 		if(this.maxResults != -1 && resultSet.size() >= this.maxResults) {
 			return;
 		}
@@ -68,8 +67,7 @@ public class CrawlingProcessor {
 	}
 	
 	private Boolean findKeyword(List<String> lines, String keyword) {	
-		Pattern p = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);
-		
+		Pattern p = Pattern.compile(keyword, Pattern.CASE_INSENSITIVE);	
 		return lines.stream().anyMatch(line -> p.matcher(line).find());
 	}
 	
@@ -112,75 +110,19 @@ public class CrawlingProcessor {
 				return new URL(uri.toString());
 			}
 		}else if(uriStr.startsWith("../")){
-			return new URL(baseURL+uri.toString().replace("../", ""));
+			return new URL(baseUrl+uri.toString().replace("../", ""));
 		}else {
-			return new URL(this.baseURL+uri.toString());
+			return new URL(this.baseUrl+uri.toString());
 		}
 		
 		return null;
 	}
 
-	private URL verifyBaseURL(String inputUrl) throws InputException {
-		if (inputUrl == null) {
-			throw new InputException("Required item: " + inputUrl);
-		}
-
-		try {
-			if(!inputUrl.endsWith("/")) {
-				inputUrl = inputUrl+ "/";
-			}
-			
-			URL url = new URL(inputUrl); // Do URL validation.
-			url.toURI(); // Do additional URI validations.
-
-			return url;
-		} catch (MalformedURLException | URISyntaxException e) {
-			throw new InputException(inputUrl, e.getCause());
-		}
-	}
-
-	private String verifyKeyword(String keyword) throws InputException {
-		if (keyword == null) {
-			throw new InputException("Required item: " + keyword);
-		}else if(!keyword.matches("^[a-zA-Z0-9_]*$")) {
-			throw new InputException("Invalid keyword, should not contain non alphanumeric characters.");
-		} else if (keyword.length() < 4 || keyword.length() > 32) {
-			throw new InputException(keyword.length());
-		}
-		
-		return keyword;
-	}
-	
-	private Integer verifyMaxResults(Integer maxResults) {
-		if(maxResults == null || maxResults == 0 || maxResults < -1){
-			return -1;
-		}
-		
-		return maxResults;
-	}
-
-	public URL getBaseURL() {
-		return baseURL;
-	}
-
-	public void setBaseURL(URL baseURL) {
-		this.baseURL = baseURL;
-	}
-
-	public String getKeyword() {
-		return keyword;
-	}
-
-	public void setKeyword(String keyword) {
-		this.keyword = keyword;
-	}
-
 	public Integer getMaxResults() {
 		return maxResults;
 	}
-
-	public void setMaxResults(Integer maxResults) {
-		this.maxResults = maxResults;
+	
+	public Set<String> getResultSet(){
+		return this.resultSet;
 	}
-
 }

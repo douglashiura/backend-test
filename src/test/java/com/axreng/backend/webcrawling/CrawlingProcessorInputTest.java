@@ -3,18 +3,26 @@ package com.axreng.backend.webcrawling;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.axreng.backend.exceptions.InputException;
 
 public class CrawlingProcessorInputTest {
 
+	private IOUtils ioUtils;
+	
+	@BeforeAll
+	public void setUp() {
+		this.ioUtils = new IOUtils();
+	}
+	
 	/*
 	 * Should fail: URL not present.
 	 */
 	@Test
 	public void urlNotPresentTest(){	
-		assertThrows(InputException.class, () -> new CrawlingProcessor(null, "four", -1));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyBaseURL(null));	
 	}
 	
 	/*
@@ -22,7 +30,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void keyWordNotPresentTest(){	
-		assertThrows(InputException.class, () -> new CrawlingProcessor("http://hiring.axreng.com/", null, -1));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword(null));	
 	}
 	
 	/*
@@ -30,7 +38,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void noProtocolTest(){
-		assertThrows(InputException.class, () -> new CrawlingProcessor("hiring.axreng.com/", "four", -1));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyBaseURL("hiring.axreng.com/"));	
 	}
 	
 	/*
@@ -38,7 +46,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void invalidUrlTest(){
-		assertThrows(InputException.class, () -> new CrawlingProcessor("http://hiri%ng.axreng.com/", "four", -1));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyBaseURL("http://hiri%ng.axreng.com/"));	
 	}
 	
 	/*
@@ -46,8 +54,8 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void invalidKeywordSizeTest01(){
-		assertThrows(InputException.class, () -> new CrawlingProcessor("http://hiring.axreng.com/", "fou", -1));	
-		assertThrows(InputException.class, () -> new CrawlingProcessor("http://hiring.axreng.com/", "fourfourfourfourfourfourfourfourf", -1));
+		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fou"));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fourfourfourfourfourfourfourfourf"));
 	}
 	
 	/*
@@ -55,7 +63,9 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void invalidKeywordNotAlphaNumeric(){
-		assertThrows(InputException.class, () -> new CrawlingProcessor("http://hiring.axreng.com/", "fou&", -1));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fou&"));
+		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fo.ur"));	
+		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fo ur"));	
 	}
 	
 	/*
@@ -97,6 +107,5 @@ public class CrawlingProcessorInputTest {
 		
 		assertEquals(-1, cp.getMaxResults());
 	}
-	
-	
+
 }
