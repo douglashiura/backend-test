@@ -47,14 +47,14 @@ public class CrawlingProcessor {
 	}
 
 	public void processUrl(URL url) throws IOException{
+		if(this.maxResults != -1 && resultSet.size() >= this.maxResults) {
+			return;
+		}
+		
 		List<String> lines = this.ioUtils.getHtmlLines(url);
 		
 		if(findKeyword(lines, keyword)) {
 			this.resultSet.add(url.toString());
-		}
-		
-		if(this.maxResults != -1 && resultSet.size() >= this.maxResults) {
-			return;
 		}
 		
 		Map<String, URL> internalUrls = findInternalUrls(lines, url.toString());
