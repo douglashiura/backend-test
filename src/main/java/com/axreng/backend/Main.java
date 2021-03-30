@@ -7,13 +7,12 @@ import com.axreng.backend.webcrawling.CrawlingProcessor;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-    	final long startTime = System.currentTimeMillis();
-
-    	CrawlingProcessor crawlingProcessor = new CrawlingProcessor("http://hiring.axreng.com", "four", -1);
+    	final String BASE_URL = System.getenv("BASE_URL");
+    	final String KEYWORD = System.getenv("KEYWORD");
+    	final String MAX_RESULTS = System.getenv("MAX_RESULTS");
+    	
+    	CrawlingProcessor crawlingProcessor = new CrawlingProcessor(BASE_URL, KEYWORD, MAX_RESULTS);
     	crawlingProcessor.executeCrawling();
     	
-    	final long endTime = System.currentTimeMillis();
-
-    	System.out.println("Total execution time: " + (endTime - startTime));
     }
 }

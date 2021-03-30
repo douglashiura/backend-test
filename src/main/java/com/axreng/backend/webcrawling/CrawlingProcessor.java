@@ -28,7 +28,7 @@ public class CrawlingProcessor {
 	
 	private IOUtils ioUtils;
 
-	public CrawlingProcessor(String baseUrl, String keyword, Integer maxResults) throws InputException {
+	public CrawlingProcessor(String baseUrl, String keyword, String maxResults) throws InputException {
 		this.ioUtils = new IOUtils();
 		
 		this.baseUrl = this.ioUtils.verifyBaseURL(baseUrl);

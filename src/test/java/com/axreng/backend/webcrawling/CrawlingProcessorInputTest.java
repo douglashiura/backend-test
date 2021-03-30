@@ -10,11 +10,11 @@ import com.axreng.backend.exceptions.InputException;
 
 public class CrawlingProcessorInputTest {
 
-	private IOUtils ioUtils;
+	private static IOUtils ioUtils;
 	
 	@BeforeAll
-	public void setUp() {
-		this.ioUtils = new IOUtils();
+	public static void setUp() {
+		ioUtils = new IOUtils();
 	}
 	
 	/*
@@ -22,7 +22,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void urlNotPresentTest(){	
-		assertThrows(InputException.class, () -> this.ioUtils.verifyBaseURL(null));	
+		assertThrows(InputException.class, () -> ioUtils.verifyBaseURL(null));	
 	}
 	
 	/*
@@ -30,7 +30,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void keyWordNotPresentTest(){	
-		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword(null));	
+		assertThrows(InputException.class, () -> ioUtils.verifyKeyword(null));	
 	}
 	
 	/*
@@ -38,7 +38,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void noProtocolTest(){
-		assertThrows(InputException.class, () -> this.ioUtils.verifyBaseURL("hiring.axreng.com/"));	
+		assertThrows(InputException.class, () -> ioUtils.verifyBaseURL("hiring.axreng.com/"));	
 	}
 	
 	/*
@@ -46,7 +46,7 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void invalidUrlTest(){
-		assertThrows(InputException.class, () -> this.ioUtils.verifyBaseURL("http://hiri%ng.axreng.com/"));	
+		assertThrows(InputException.class, () -> ioUtils.verifyBaseURL("http://hiri%ng.axreng.com/"));	
 	}
 	
 	/*
@@ -54,8 +54,8 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void invalidKeywordSizeTest01(){
-		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fou"));	
-		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fourfourfourfourfourfourfourfourf"));
+		assertThrows(InputException.class, () -> ioUtils.verifyKeyword("fou"));	
+		assertThrows(InputException.class, () -> ioUtils.verifyKeyword("fourfourfourfourfourfourfourfourf"));
 	}
 	
 	/*
@@ -63,9 +63,9 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void invalidKeywordNotAlphaNumeric(){
-		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fou&"));
-		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fo.ur"));	
-		assertThrows(InputException.class, () -> this.ioUtils.verifyKeyword("fo ur"));	
+		assertThrows(InputException.class, () -> ioUtils.verifyKeyword("fou&"));
+		assertThrows(InputException.class, () -> ioUtils.verifyKeyword("fo.ur"));	
+		assertThrows(InputException.class, () -> ioUtils.verifyKeyword("fo ur"));	
 	}
 	
 	/*
@@ -73,7 +73,17 @@ public class CrawlingProcessorInputTest {
 	 */
 	@Test
 	public void shouldConstructValidCrawlingProcessor01() throws InputException{	
-		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "fou4", -1);	
+		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "fou4", "-1");	
+		
+		assertEquals(-1, cp.getMaxResults());
+	}
+	
+	/*
+	 * Should Pass with no max results.
+	 */
+	@Test
+	public void shouldConstructValidCrawlingProcessor02() throws InputException{	
+		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "fou4", null);	
 		
 		assertEquals(-1, cp.getMaxResults());
 	}
@@ -82,8 +92,8 @@ public class CrawlingProcessorInputTest {
 	 * Should Pass with max results.
 	 */
 	@Test
-	public void shouldConstructValidCrawlingProcessor02() throws InputException{	
-		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "four", 10);	
+	public void shouldConstructValidCrawlingProcessor03() throws InputException{	
+		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "four", "10");	
 		
 		assertEquals(10, cp.getMaxResults());
 	}
@@ -92,8 +102,8 @@ public class CrawlingProcessorInputTest {
 	 * Should Pass and convert max results to -1 due an invalid number input.
 	 */
 	@Test
-	public void shouldConstructValidCrawlingProcessor03() throws InputException{	
-		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "four", -10);
+	public void shouldConstructValidCrawlingProcessor04() throws InputException{	
+		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "four", "-10");
 		
 		assertEquals(-1, cp.getMaxResults());
 	}
@@ -102,8 +112,8 @@ public class CrawlingProcessorInputTest {
 	 * Should Pass and convert max results to -1 due an invalid number input.
 	 */
 	@Test
-	public void shouldConstructValidCrawlingProcessor04() throws InputException{	
-		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "four", 0);
+	public void shouldConstructValidCrawlingProcessor05() throws InputException{	
+		CrawlingProcessor cp = new CrawlingProcessor("http://hiring.axreng.com/", "four", "0");
 		
 		assertEquals(-1, cp.getMaxResults());
 	}

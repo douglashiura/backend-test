@@ -62,8 +62,10 @@ public class IOUtils {
 		return keyword;
 	}
 	
-	public Integer verifyMaxResults(Integer maxResults) {
-		if(maxResults == null || maxResults == 0 || maxResults < -1){
+	public Integer verifyMaxResults(String maxResultsStr) {
+		Integer maxResults = maxResultsStr == null ? -1 : Integer.valueOf(maxResultsStr);
+		
+		if(maxResults == 0 || maxResults < -1){
 			return -1;
 		}
 		

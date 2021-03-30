@@ -22,14 +22,14 @@ public class CrawlingProcessorFunctionalTest {
 	@InjectMocks
 	private CrawlingProcessor crawlingProcessor;
 
-	public void setUp(String url, String keyword, Integer maxResults) throws IOException {
+	public void setUp(String url, String keyword, String maxResults) throws IOException {
 		this.crawlingProcessor = new CrawlingProcessor(url, keyword, maxResults);
 		MockitoAnnotations.openMocks(this);
 	}
 
 	@Test
 	public void shouldVisitTwoPagesFindTwoResults01() throws IOException {
-		setUp("http://hiring.axreng.com/", "before", -1);
+		setUp("http://hiring.axreng.com/", "before", "-1");
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(2));		
 
@@ -43,7 +43,7 @@ public class CrawlingProcessorFunctionalTest {
 	 */
 	@Test
 	public void shouldVisitTwoPagesFindTwoResults02() throws IOException {
-		setUp("http://hiring.axreng.com/", "BeFoRe", -1);
+		setUp("http://hiring.axreng.com/", "BeFoRe", "-1");
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(2));		
 
@@ -54,7 +54,7 @@ public class CrawlingProcessorFunctionalTest {
 	
 	@Test
 	public void shouldVisitTwoPagesFindOneResult() throws IOException {
-		setUp("http://hiring.axreng.com/", "before", 1);
+		setUp("http://hiring.axreng.com/", "before", "1");
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(2));		
 
@@ -65,7 +65,7 @@ public class CrawlingProcessorFunctionalTest {
 	
 	@Test
 	public void shouldNotVisitSecondPage() throws IOException {
-		setUp("http://hiring.axreng.com/", "before", 1);
+		setUp("http://hiring.axreng.com/", "before", "1");
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/"))).willReturn(getLines(1));		
 		given(ioUtils.getHtmlLines(new URL("http://hiring.axreng.com/index8.html"))).willReturn(getLines(3));		
 
